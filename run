@@ -1,0 +1,30 @@
+#!/bin/bash
+
+SOURCE_DIRS="."
+DLL_PATH="bin/Release/net9.0/BasicHttpServer.dll"
+
+needs_build=false
+
+# Check if DLL exists
+if [ ! -f "$DLL_PATH" ]; then
+  needs_build=true
+fi
+
+# Check if any source file is newer than the DLL
+if [ "$needs_build" = false ]; then
+  for file in $(find $SOURCE_DIRS -name "*.cs"); do
+    if [ "$file" -nt "$DLL_PATH" ]; then
+      needs_build=true
+      break
+    fi
+  done
+fi
+
+# Build if needed
+if [ "$needs_build" = true ]; then
+  echo "Building project..."
+  dotnet build --configuration Release
+fi
+
+# Run
+dotnet "$DLL_PATH"
