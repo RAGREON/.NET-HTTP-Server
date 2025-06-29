@@ -1,0 +1,14 @@
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.GeneratedMSBuildEditorConfig.editorconfig
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.AssemblyInfoInputs.cache
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.AssemblyInfo.cs
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.csproj.CoreCompileInputs.cache
+C:\year\2025\dotnet\BasicHttpServer\bin\Debug\net9.0\BasicHttpServer.exe
+C:\year\2025\dotnet\BasicHttpServer\bin\Debug\net9.0\BasicHttpServer.deps.json
+C:\year\2025\dotnet\BasicHttpServer\bin\Debug\net9.0\BasicHttpServer.runtimeconfig.json
+C:\year\2025\dotnet\BasicHttpServer\bin\Debug\net9.0\BasicHttpServer.dll
+C:\year\2025\dotnet\BasicHttpServer\bin\Debug\net9.0\BasicHttpServer.pdb
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.dll
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\refint\BasicHttpServer.dll
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.pdb
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\BasicHttpServer.genruntimeconfig.cache
+C:\year\2025\dotnet\BasicHttpServer\obj\Debug\net9.0\ref\BasicHttpServer.dll
