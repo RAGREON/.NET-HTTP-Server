@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BasicHttpServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ec7dac821c762b89a9a0391795d99de5f0848cd7")]
 [assembly: System.Reflection.AssemblyProductAttribute("BasicHttpServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BasicHttpServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
