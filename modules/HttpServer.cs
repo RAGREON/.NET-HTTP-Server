@@ -16,7 +16,7 @@ namespace HTTP
   }
 
   enum Method {
-    GET, POST, PUT, DELETE
+    GET, POST, PUT, DELETE, OPTIONS
   }
 
   class Router {
@@ -24,36 +24,42 @@ namespace HTTP
 
     public Router()
     {
-      router = new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>[4];
+      int methodCount = Enum.GetNames(typeof(Method)).Length;
+      router = new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>[methodCount];
+
+      for (int i = 0; i < methodCount; i++)
+      {
+        router[i] = new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>();
+      }
     }
 
     public void get(string apiRoute, Action<HttpListenerRequest, HttpListenerResponse> controllerFn)
     {
-      router[Method.GET][apiRoute] = controllerFn;
+      router[(int) Method.GET][apiRoute] = controllerFn;
     }
 
     public void post(string apiRoute, Action<HttpListenerRequest, HttpListenerResponse> controllerFn)
     {
-      router[Method.POST][apiRoute] = controllerFn;
+      router[(int) Method.POST][apiRoute] = controllerFn;
     }
 
     public void put(string apiRoute, Action<HttpListenerRequest, HttpListenerResponse> controllerFn)
     {
-      router[Method.PUT][apiRoute] = controllerFn;
+      router[(int) Method.PUT][apiRoute] = controllerFn;
     }
 
     public void delete(string apiRoute, Action<HttpListenerRequest, HttpListenerResponse> controllerFn)
     {
-      router[Method.DELETE][apiRoute] = controllerFn;
+      router[(int) Method.DELETE][apiRoute] = controllerFn;
     }
 
     public void handleRoute(Method method, string apiRoute, HttpListenerRequest req, HttpListenerResponse res)
     {
       try
       {
-        if (Enum.IsDefined(typeof(Method), method) && !IsNullOrWhiteSpace(apiRoute) && router[method].ContainsKey(apiRoute)) 
+        if (Enum.IsDefined(typeof(Method), method) && !string.IsNullOrWhiteSpace(apiRoute) && router[(int) method].ContainsKey(apiRoute)) 
         {
-          router[method][apiRoute](req, res);
+          router[(int) method][apiRoute](req, res);
         }
       } catch (Exception ex)
       {
@@ -65,6 +71,7 @@ namespace HTTP
   class Server
   {
     private readonly int PORT;
+    private bool corsEnabled = false;
 
     private HttpListener listener;
 
@@ -72,18 +79,19 @@ namespace HTTP
     private HttpListenerRequest request;
     private HttpListenerResponse response;
 
-    private Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>> router;
-    
+    private Dictionary<string, Router> router;
 
     public Server(int PORT)
     {
       this.PORT = PORT;
-      router = new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>();
+      router = new Dictionary<string, Router>();
 
       try {
         listener = new HttpListener();
         listener.Prefixes.Add($"http://localhost:{PORT}/");
         listener.Start();
+
+
 
         Console.WriteLine($"Server is running at: http://localhost:{PORT}/");
       } catch (Exception ex)
@@ -108,22 +116,56 @@ namespace HTTP
       
       response.ContentLength64 = buffer.Length;
       response.OutputStream.Write(buffer, 0, buffer.Length);
-      response.OutputStream.Close();
-    }
-
-    public void setRoute(string apiRoute, Action<HttpListenerRequest, HttpListenerResponse> controllerFn)
-    {
-      router[apiRoute] = controllerFn;
     }
 
     public void handleRoutes()
     {
-      string route = request.Url.AbsolutePath;
+      string path = request.Url.AbsolutePath;
+      string[] segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+      string apiEndpoint;
+      string remainingPath = "/";
 
-      if (!string.IsNullOrWhiteSpace(route) && router.ContainsKey(route))
+      if (segments.Length < 2) return;
+      
+      apiEndpoint = "/" + segments[0] + "/" + segments[1] + "/";
+
+      if (segments.Length > 2)
       {
-        router[route](request, response);
+        remainingPath += string.Join("/", segments.Skip(2));
       }
+
+      Method method = (Method) Enum.Parse(typeof(Method), request.HttpMethod);
+
+      if (method == Method.OPTIONS)
+      {
+        response.StatusCode = 200;
+        response.AddHeader("Access-Control-Allow-Origin", "*");
+        response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.AddHeader("Access-Control-Allow-Headers", "Content-Type");
+        response.OutputStream.Close();
+        return;
+      }
+
+      Console.WriteLine($"---\nMethod: {method.ToString()}\nAPI End-Point: {apiEndpoint}\n---");
+
+      if (router.ContainsKey(apiEndpoint))
+      {
+
+        router[apiEndpoint].handleRoute(method, remainingPath, request, response);
+      }
+    }
+
+    public void useRouter(string apiEndpoint, Router router)
+    {
+      if (apiEndpoint[apiEndpoint.Length - 1] != '/')
+        apiEndpoint += "/";
+
+      this.router[apiEndpoint] = router;
+    }
+
+    public void EnableCors()
+    {
+      corsEnabled = true;
     }
 
     public void listen()
@@ -131,9 +173,16 @@ namespace HTTP
       while (true)
       {
         getRequest();
-        handleRoutes();
 
-        Console.WriteLine($"received: {request.HttpMethod} | {request.Url}");
+        if (corsEnabled)
+        {
+          response.AddHeader("Access-Control-Allow-Origin", "*");
+          response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+          response.AddHeader("Access-Control-Allow-Headers", "Content-Type"); 
+        }
+
+        handleRoutes();
+        response.OutputStream.Close();
       }
     }
   }
