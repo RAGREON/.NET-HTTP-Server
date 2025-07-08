@@ -1,44 +1,44 @@
-﻿using System.Net;
+﻿using Interfaces;
+using Modules;
 using System.Collections.Generic;
-using HTTP;
 
 class Program
 {
   static void Main(string[] args)
   {
-    Server server = new Server(9000);
+    Model model = new Model();
 
-    server.setRoute("/", (req, res) => {
-      var serverResponse = new {
-        message = "Hello, This is a message from the server."
-      };
+    Field usernameField = new Field(
+        name: "USERNAME",
+        type: "VARCHAR(50)",
+        nullable: false,
+        primaryKey: false,
+        foreignKey: false
+    );
 
-      byte[] buffer = System.Text.Encoding.UTF8.GetBytes(
-        System.Text.Json.JsonSerializer.Serialize(serverResponse)
-      );
+    Field passwordField = new Field(
+        name: "PASSWORD",
+        type: "VARCHAR(50)",
+        nullable: false,
+        primaryKey: false,
+        foreignKey: false
+    );
+    
+    List<IField> fields = new List<IField>() {
+      usernameField, passwordField
+    };
 
-      res.ContentType = "application/json";
-      res.ContentLength64 = buffer.Length;
-      res.OutputStream.Write(buffer, 0, buffer.Length);
-      res.OutputStream.Close();
-    });
+    foreach (IField field in fields)
+    {
+      field.Properties();
+    }
 
-    server.setRoute("/item", (req, res) => {
-      var itemInfo = new {
-        name = "Laptop",
-        model = "NITRO-5",
-        processor = "i5-11400h"
-      };
+    Console.WriteLine("Database Client Test");
+    string connectionString = "Server=DESKTOP-NE882SF\\MSSQLSERVER01;Database=Crextio;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True;";
 
-      var serverResponse = new Response(
-        statusCode: 200,
-        contentType: "application/json",
-        body: System.Text.Json.JsonSerializer.Serialize(itemInfo)
-      );
+    DatabaseClient dbClient = new DatabaseClient(connectionString);
 
-      server.sendResponse(serverResponse);
-    });
-
-    server.listen();
+    dbClient.Connect();
+    dbClient.Disconnect();
   }
 }

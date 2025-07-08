@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Define colors
+CYAN='\033[1;36m'
+GREEN='\033[1;32m'
+RESET='\033[0m'
+
+# Header
+printf "${CYAN}%-8s %-8s %-8s %s${RESET}\n" "Lines" "Words" "Chars" "File"
+echo "---------------------------------------------------------"
+
+# Per-file output
+find . \( -path "./bin" -o -path "./obj" \) -prune -o \
+  -type f -iname "*.cs" -print0 |
+  xargs -0 wc -l -w -m | grep -v ' total$' | while read -r lines words chars file; do
+    printf "%-8s %-8s %-8s %s\n" "$lines" "$words" "$chars" "$file"
+  done
+
+# Separator and total
+echo "---------------------------------------------------------"
+echo -e "${GREEN}Total:${RESET}"
+find . \( -path "./bin" -o -path "./obj" \) -prune -o \
+  -type f -iname "*.cs" -print0 |
+  xargs -0 wc -l -w -m | tail -n 1 | while read -r lines words chars file; do
+    printf "${GREEN}%-8s %-8s %-8s %s${RESET}\n" "$lines" "$words" "$chars" "$file"
+  done
